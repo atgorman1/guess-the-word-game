@@ -29,3 +29,11 @@ const hideLetters = function (word) {
   inProgWord.innerText = placeholderLetters.join(""); // combine all of the objects in the array (all the circles) into one string and add it to the word in progress <p>
 };
 hideLetters(word);
+
+// Event Listener for Guess Button - When button is clicked, store letter value in conole unthe letterInput variable, and then change the input box back to blank.
+guessButton.addEventListener("click", function (e) {
+  e.preventDefault();
+  const letterInput = inputLetterBox.value;
+  console.log(letterInput);
+  inputLetterBox.value = "";
+});
