@@ -7,7 +7,7 @@ const inputLetterBox = document.querySelector(".letter");
 // Empty <p> where word in progress will appear
 const inProgWord = document.querySelector(".word-in-progress");
 // <p> where remaining guesses will appear
-const remainingGuesses = document.querySelector(".remaining");
+const guessesLeft = document.querySelector(".remaining");
 // <span> inside <p> that shows how many guesses are left
 const numGuessesLeft = document.querySelector(".remaining span");
 // Empty <p> where messages to players appear
@@ -15,23 +15,52 @@ const msgToUser = document.querySelector(".message");
 // Button that prompts users to play again (hidden at first)
 const playAgainButton = document.querySelector(".play-again");
 
+// Number of guesses left
+var remainingGuesses = 8;
 // Starter word
-const word = "cat";
-
+let word = "cat";
 // letters that the player has guessed
 const guessedLetters = [];
 
+// async function that pulls words from API and turns the words in the text file into objects in an array
+const getWord = async function () {
+  const res = await fetch(
+    "https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt"
+  );
+  const word = await res.text();
+  // since this is a text file and not json, the words need to be converted into an array of objects
+  // since the words are split up by a page break, you need to use the /n s the delimiter to break them into individual words
+  const wordArray = word.split("\n");
+  console.log(wordArray);
+  selectRandomWord(wordArray);
+};
+getWord();
+
+// function that selects a random word from the list of words from the API
+const selectRandomWord = async function (words) {
+  // Math.random produces a random number between 0 and 1 - multiply by the length of the word array to choose a random index
+  // Math.floor rounds the number down since index starts with 0 and you want a whole number to match an index position
+  const randomIndex = Math.floor(Math.random() * words.length);
+  // randomWord - from the words index, pulling a random index to log out the word that matches that index
+  const randomWord = words[randomIndex].trim();
+  console.log(randomWord);
+  word = randomWord;
+  hideLetters(randomWord);
+};
+
 // function that replaces the letters of the word with circles before letters are guessed
 const hideLetters = function (word) {
-  const placeholderLetters = []; // new blank array that circles will get added to
+  // new blank array that circles will get added to
+  const placeholderLetters = [];
+  // for every letter in the word
   for (const letter of word) {
-    // for every letter in the word
-    console.log(letter); // logs out each letter in the console
-    placeholderLetters.push("●"); // adds circle to the end of the empty placeholderLetters array for each letter in the word ["●","●" ,"●" ,"●" ,"●" ,"●","●"]
+    // adds circle to the end of the empty placeholderLetters array for each letter in the word ["●","●" ,"●" ,"●" ,"●" ,"●","●"]
+    placeholderLetters.push("●");
   }
-  inProgWord.innerText = placeholderLetters.join(""); // combine all of the objects in the array (all the circles) into one string and add it to the word in progress <p>
+  // combine all of the objects in the array (all the circles) into one string and add it to the word in progress <p>
+  inProgWord.innerText = placeholderLetters.join("");
 };
-hideLetters(word); // call function so letters will be replaced with circles
+// call function so letters will be replaced with circles
 
 // Event Listener for Guess Button - When button is clicked, store letter value in console  of the guess variable, and then change the input box back to blank.
 guessButton.addEventListener("click", function (e) {
@@ -83,6 +112,7 @@ const makeGuess = function (guess) {
     guessedLetters.push(guess);
     console.log(guessedLetters);
     displayLetters();
+    guessCount(guess);
     updateWordInProg(guessedLetters);
   }
 };
@@ -120,6 +150,22 @@ const updateWordInProg = function (guessedLetters) {
   // Update the text of the in progress word from placeholder letters to the reveal word array
   inProgWord.innerText = revealWord.join("");
   win();
+};
+
+// function that counts the number of guesses remaining
+const guessCount = function (guess) {
+  const wordUpper = word.toUpperCase();
+  if (wordUpper.includes(guess)) {
+    msgToUser.innerText = `Nice job! ${guess} is correct!`;
+  } else {
+    msgToUser.innerText = "Nope! Please guess again.";
+    remainingGuesses -= 1;
+  }
+  numGuessesLeft.innerText = remainingGuesses;
+  if (remainingGuesses === 0) {
+    msgToUser.innerHTML = `Game over - the correct word is: ${word.toUpperCase()}</br><br>Refresh your browser to guess a new word!`;
+    guessButton.disabled = true;
+  }
 };
 
 // function that checks if player won
