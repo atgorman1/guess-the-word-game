@@ -20,7 +20,7 @@ var remainingGuesses = 8;
 // Starter word
 let word = "cat";
 // letters that the player has guessed
-const guessedLetters = [];
+var guessedLetters = [];
 
 // async function that pulls words from API and turns the words in the text file into objects in an array
 const getWord = async function () {
@@ -163,8 +163,8 @@ const guessCount = function (guess) {
   }
   numGuessesLeft.innerText = remainingGuesses;
   if (remainingGuesses === 0) {
-    msgToUser.innerHTML = `Game over - the correct word is: ${word.toUpperCase()}</br><br>Refresh your browser to guess a new word!`;
-    guessButton.disabled = true;
+    msgToUser.innerHTML = `Game over - the correct word is: ${word.toUpperCase()}`;
+    startOver();
   }
 };
 
@@ -173,5 +173,28 @@ const win = function () {
   if (inProgWord.innerText === word.toUpperCase()) {
     msgToUser.classList.add("win");
     msgToUser.innerHTML = `<p class="highlight">You guessed correct the word! Congrats!</p>.`;
+    startOver();
   }
 };
+
+// function to show / hide certain elements that will be added to functions when the game is over
+const startOver = function () {
+  guessButton.classList.add("hide");
+  guessesLeft.classList.add("hide");
+  guessedLettersUl.classList.add("hide");
+  playAgainButton.classList.remove("hide");
+};
+
+// click even listener for play again button
+playAgainButton.addEventListener("click", function () {
+  msgToUser.classList.remove("win");
+  msgToUser.innerText = "";
+  (guessedLettersUl.innerText = ""), (numGuessesLeft.innerText = 8);
+  guessedLetters = [];
+  remainingGuesses = 8;
+  guessButton.classList.remove("hide");
+  guessesLeft.classList.remove("hide");
+  guessedLettersUl.classList.remove("hide");
+  playAgainButton.classList.add("hide");
+  getWord();
+});
